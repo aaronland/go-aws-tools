@@ -14,8 +14,8 @@ import (
 	"flag"
 	_ "fmt"
 	"github.com/aaronland/go-aws-tools/auth"
+	"github.com/aaronland/go-aws-tools/cli"
 	"github.com/aaronland/go-aws-tools/config"
-	"github.com/aaronland/go-aws-tools/utils"
 	"github.com/whosonfirst/iso8601duration"
 	"log"
 	"strings"
@@ -34,7 +34,7 @@ func main() {
 	d, err := duration.FromString(*session_duration)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to parse session duration, %v", err)
 	}
 
 	ttl := d.ToDuration().Seconds()
@@ -43,36 +43,36 @@ func main() {
 	cfg, err := config.NewConfig()
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to create new config, %v", err)
 	}
 
 	aws_cfg, err := cfg.AWSConfigWithProfile(*profile)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to create AWS config, %v", err)
 	}
 
 	*code = strings.TrimSpace(*code)
 
 	if *code == "" {
 
-		*code = utils.Readline("Enter your MFA token code:")
+		*code = cli.Readline("Enter your MFA token code:")
 
 		if *code == "" {
-			log.Fatal("Invalid token code")
+			log.Fatalf("Missing MFA code")
 		}
 	}
 
 	creds, err := auth.GetCredentialsWithMFA(aws_cfg, *code, ttl_32)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to get credentials with MFA, %v", err)
 	}
 
 	err = cfg.SetSessionCredentialsWithProfile(*session_profile, creds)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to get credentials with session profile, %v", err)
 	}
 
 	now := time.Now()

@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	_ "github.com/aws/aws-sdk-go-v2/service/sts"
+	aws_config "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/go-ini/ini"
+	"log"
 	"os"
 )
 
 type Config struct {
 	Path string
+	ini  *ini.File
 }
 
 func NewConfig() (*Config, error) {
@@ -20,7 +21,7 @@ func NewConfig() (*Config, error) {
 	var ini_config *ini.File
 	var ini_path string
 
-	for _, path := range config.DefaultSharedConfigFiles {
+	for _, path := range aws_config.DefaultSharedCredentialsFiles {
 
 		_, err := os.Stat(path)
 
@@ -45,6 +46,7 @@ func NewConfig() (*Config, error) {
 
 	c := Config{
 		Path: ini_path,
+		ini:  ini_config,
 	}
 
 	return &c, nil
@@ -54,8 +56,15 @@ func (c *Config) AWSConfigWithProfile(profile string) (aws.Config, error) {
 
 	ctx := context.Background()
 
-	cfg := config.WithSharedConfigProfile(profile)
-	return config.LoadDefaultConfig(ctx, cfg)
+	sect := c.ini.Section("default")
+	region := sect.Key("region")
+
+	log.Println("WHAT", region)
+
+	return aws_config.LoadDefaultConfig(ctx,
+		aws_config.WithSharedConfigProfile(profile),
+		aws_config.WithRegion(region.String()),
+	)
 }
 
 func (c *Config) SetSessionCredentialsWithProfile(profile string, creds *types.Credentials) error {
