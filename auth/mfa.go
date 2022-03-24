@@ -22,11 +22,7 @@ func GetCredentialsWithMFA(cfg aws.Config, token string, duration int32) (*types
 
 func GetCredentialsWithMFAWithContext(ctx context.Context, cfg aws.Config, token string, duration int32) (*types.Credentials, error) {
 
-	sts_opts := sts.Options{
-		Region: cfg.Region,
-	}
-
-	sts_client := sts.New(sts_opts)
+	sts_client := sts.NewFromConfig(cfg)
 
 	username, err := username(ctx, sts_client)
 
@@ -34,11 +30,7 @@ func GetCredentialsWithMFAWithContext(ctx context.Context, cfg aws.Config, token
 		return nil, err
 	}
 
-	iam_opts := iam.Options{
-		Region: cfg.Region,
-	}
-
-	iam_client := iam.New(iam_opts)
+	iam_client := iam.NewFromConfig(cfg)
 
 	mfaDevice, err := mfaDevice(ctx, iam_client, username)
 

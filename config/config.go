@@ -7,7 +7,7 @@ import (
 	aws_config "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/go-ini/ini"
-	"log"
+	_ "log"
 	"os"
 )
 
@@ -58,8 +58,6 @@ func (c *Config) AWSConfigWithProfile(profile string) (aws.Config, error) {
 
 	sect := c.ini.Section("default")
 	region := sect.Key("region")
-
-	log.Println("WHAT", region)
 
 	return aws_config.LoadDefaultConfig(ctx,
 		aws_config.WithSharedConfigProfile(profile),
