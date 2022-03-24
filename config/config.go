@@ -1,10 +1,12 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/aws/external"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/aws-sdk-go-v2/config"
+	_ "github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/go-ini/ini"
 	"os"
 )
@@ -18,7 +20,7 @@ func NewConfig() (*Config, error) {
 	var ini_config *ini.File
 	var ini_path string
 
-	for _, path := range external.DefaultSharedConfigFiles {
+	for _, path := range config.DefaultSharedConfigFiles {
 
 		_, err := os.Stat(path)
 
@@ -50,11 +52,13 @@ func NewConfig() (*Config, error) {
 
 func (c *Config) AWSConfigWithProfile(profile string) (aws.Config, error) {
 
-	cfg := external.WithSharedConfigProfile(profile)
-	return external.LoadDefaultAWSConfig(cfg)
+	ctx := context.Background()
+
+	cfg := config.WithSharedConfigProfile(profile)
+	return config.LoadDefaultConfig(ctx, cfg)
 }
 
-func (c *Config) SetSessionCredentialsWithProfile(profile string, creds *sts.Credentials) error {
+func (c *Config) SetSessionCredentialsWithProfile(profile string, creds *types.Credentials) error {
 
 	ini_path := c.Path
 	ini_config, err := ini.Load(ini_path)
