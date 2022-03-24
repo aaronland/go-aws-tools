@@ -37,8 +37,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ttl_fl := d.ToDuration().Seconds()
-	ttl := int64(ttl_fl)
+	ttl := d.ToDuration().Seconds()
+	ttl_32 := int32(ttl)
 
 	cfg, err := config.NewConfig()
 
@@ -63,7 +63,7 @@ func main() {
 		}
 	}
 
-	creds, err := auth.GetCredentialsWithMFA(aws_cfg, *code, ttl)
+	creds, err := auth.GetCredentialsWithMFA(aws_cfg, *code, ttl_32)
 
 	if err != nil {
 		log.Fatal(err)
